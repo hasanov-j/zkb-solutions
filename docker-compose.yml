@@ -1,0 +1,139 @@
+version: '3'
+
+services:
+
+  #MySQL Service
+  zkb-solutions-db:
+    image: mysql:8.0
+    container_name: zkb-solutions-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "33063:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    networks:
+      - laravel-network
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+
+  #Redis Service
+  zkb-solutions-redis:
+    image: redis:alpine
+    container_name: zkb-solutions-redis
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "63792:6379"
+    networks:
+      - laravel-network
+    volumes:
+      - ./data/redis:/data
+
+  #PHP Service
+  zkb-solutions-app:
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
+    restart: unless-stopped
+    container_name: zkb-solutions-app
+    working_dir: /var/www
+    environment:
+      PHP_IDE_CONFIG: serverName=ZkbSolutionsJafar
+      DB_DATABASE: ${DB_DATABASE}
+      DB_HOST: ${DB_HOST}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SESSION_DRIVER: ${SESSION_DRIVER}
+    tty: true
+    networks:
+      - laravel-network
+    volumes:
+      - ./application:/var/www
+      - ./docker/app/php.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - zkb-solutions-db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  #Nginx Service
+  zkb-solutions-webserver:
+    image: nginx:alpine
+    container_name: zkb-solutions-webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "7779:80"
+    networks:
+      - laravel-network
+    volumes:
+      - ./application:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - zkb-solutions-app
+
+  #Laravel Horizon Service
+  zkb-solutions-horizon:
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
+    container_name: zkb-solutions-horizon
+    restart: unless-stopped
+    tty: true
+    command: ["php", "artisan", "horizon"]
+    environment:
+      SERVICE_NAME: zkb-solutions-horizon
+      SERVICE_TAGS: dev
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      APP_ENV: ${APP_ENV}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    working_dir: /var/www
+    networks:
+      - laravel-network
+    volumes:
+      - ./application:/var/www
+    depends_on:
+      - zkb-solutions-redis
+
+  # Supervisor Service
+  zkb-solutions-supervisor:
+    build:
+      context: ./
+      dockerfile: ./docker/supervisor/Dockerfile
+    working_dir: /var/www
+    container_name: zkb-solutions-supervisor
+    restart: unless-stopped
+    networks:
+      - laravel-network
+    environment:
+      SERVICE_NAME: zkb-solutions-app
+      SERVICE_TAGS: local
+      APP_ENV: ${APP_ENV}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SESSION_DRIVER: ${SESSION_DRIVER}
+    volumes:
+      - ./docker/supervisor/conf.d:/etc/supervisor/conf.d
+      - ./application:/var/www
+
+
+#Docker Networks
+networks:
+  laravel-network:
+    driver: bridge
