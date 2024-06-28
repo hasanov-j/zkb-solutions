@@ -34,6 +34,11 @@ class Feedback extends Model
         return $this->belongsTo(Review::class, 'review_id', 'id');
     }
 
+    public function getReview(): Review
+    {
+        return $this->review;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
