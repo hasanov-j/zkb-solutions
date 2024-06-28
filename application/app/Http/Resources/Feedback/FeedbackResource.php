@@ -17,6 +17,11 @@ class FeedbackResource extends JsonResource
             'id'=> $data->getId(),
             'message' => $data->getMessage(),
             'answered_at' => $data->getAnsweredAt()->toString(),
+            'user' => [
+                'id' => $data->getUser()->getId(),
+                'email' => $data->getUser()->getEmail(),
+                'username' => $data->getUser()->getUserName(),
+            ],
         ];
     }
 }

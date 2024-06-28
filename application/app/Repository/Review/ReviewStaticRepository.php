@@ -9,11 +9,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ReviewStaticRepository
 {
-    public static function getAllByUserWithPaginate(
-        User $user,
+    public static function getAllWithPaginate(
         int $elementCount = 5
     ): LengthAwarePaginator {
-        return Review::where('user_id', $user->getId())
-            ->paginate($elementCount);
+        return Review::paginate($elementCount);
     }
 }

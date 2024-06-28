@@ -18,6 +18,11 @@ class ReviewResource extends JsonResource
             'id' => $data->getId(),
             'message' => $data->getMessage(),
             'reviewed_at' => $data->getReviewedAt()->toString(),
+            'user' => [
+                'id' => $data->getUser()->getId(),
+                'email' => $data->getUser()->getEmail(),
+                'username' => $data->getUser()->getUserName(),
+            ],
             'feedbacks' => new FeedbackResourceCollection($data->getFeedbacks()),
         ];
     }

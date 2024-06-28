@@ -26,9 +26,7 @@ class ReviewController extends Controller
 
     public function index(ReviewIndexRequest $request): ReviewResourceCollection
     {
-        $reviews = ReviewStaticRepository::getAllByUserWithPaginate(
-            $request->user(),
-        );
+        $reviews = ReviewStaticRepository::getAllWithPaginate();
 
         return new ReviewResourceCollection($reviews);
     }
