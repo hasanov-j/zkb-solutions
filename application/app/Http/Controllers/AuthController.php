@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\AuthExceptions\PasswordIncorrectException;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\SignInRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\SignUpRequest;
 use App\Models\User;
 use App\Repository\User\UserRepository;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +18,7 @@ class AuthController extends Controller
     ) {
     }
 
-    public function signUp(SignInRequest $request)
+    public function signUp(SignUpRequest $request)
     {
         /** @var User $user */
         $user = $this->userRepository->findByEmail($request->getEmail());

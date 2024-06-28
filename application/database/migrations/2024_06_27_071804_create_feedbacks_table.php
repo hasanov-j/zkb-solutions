@@ -13,6 +13,9 @@ return new class extends Migration
             $table->foreignId('review_id')
                 ->constrained('reviews')
                 ->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
             $table->string('message');
             $table->dateTime('answered_at');
             $table->timestamps();

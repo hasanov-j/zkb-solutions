@@ -5,7 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Carbon\Carbon;
 use Dirape\Token\Token;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -20,7 +22,7 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'timezone',
+        'is_admin',
     ];
 
 
@@ -64,18 +66,28 @@ class User extends Authenticatable
         return $this->password;
     }
 
-    public function setTimeZone(string $timezone): void
+    public function isAdmin(): bool
     {
-        $this->timezone = $timezone;
+        return $this->is_admin;
     }
 
-    public function getTimeZone(string $timezone): string
+    public function reviews(): HasMany
     {
-        return $this->timezone;
+        return $this->hasMany(Review::class, 'user_id', 'id');
     }
 
-    public function getUserRealTimeByTimezone(): Carbon
+    public function getReviews(): Collection
     {
-        return now($this->timezone);
+        return $this->reviews;
+    }
+
+    public function feedbacks(): HasMany
+    {
+        return $this->hasMany(Feedback::class, 'user_id', 'id');
+    }
+
+    public function getFeedbacks(): Collection
+    {
+        return $this->feedbacks;
     }
 }
