@@ -23,3 +23,13 @@ Laravel + nginx + mysql + websocket
 Использование дополнительных библиотек не запрещается
 
 формат Api - json
+
+Postman документация:
+---------------------------
+
+- https://documenter.getpostman.com/view/31842043/2sA3duEsQp
+
+видеодокументация:
+---------------------------
+
+- https://youtu.be/ULu3g4zVTwQ
